@@ -23,7 +23,7 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   // Initializations
   glewInit();
   menu_init();
-
+  
   return 1;
 
 }

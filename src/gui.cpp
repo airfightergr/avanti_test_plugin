@@ -15,6 +15,7 @@ float scale = 1.0f;
 char plugindir[MAX_PATH]{};
 char *p;
 
+
 std::string GetPluginPath() {
 
   XPLMGetPluginInfo(XPLMGetMyID(), NULL, plugindir, NULL, NULL);
@@ -40,27 +41,117 @@ std::string GetPluginPath() {
 
 }
 
+
+ImFont *test10;
+ImFont *test20;
+void RecreateFontAtlas() {
+    // test Ben's code
+  ImGuiIO& io = ImGui::GetIO();
+
+  IM_DELETE(io.Fonts);
+
+  io.Fonts = IM_NEW(ImFontAtlas);
+
+  ImFontConfig config;
+  config.OversampleH = 4;
+  config.OversampleV = 4;
+  config.PixelSnapH = false;
+
+  std::string menu_font = "/mnt/916d7a1f-7d19-4354-823b-6606cd3a516e/X-Plane 12 Betas/Aircraft/ILIAS/P180_Avanti_II/plugins/avanti/resources/Roboto-Regular.ttf";
+    
+  test10 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 10.0f, &config);
+  if (test10 == NULL) {
+    logMsg("test10 did not load");
+  }
+
+  test20 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 20.0f, &config);
+  if (test20 == NULL) {
+    logMsg("test20 did not LOAD!");
+  }
+
+    logMsg("Menu Font: %s", menu_font.c_str());
+
+  io.Fonts->Build();
+}
+
+
+void InitImGui() {
+  ImGui::CreateContext();
+  RecreateFontAtlas();
+}
+
+
 class ConfigureWindow : public ImgFontAtlas {
-
-  public:
-
+public:
   ConfigureWindow() : ImgFontAtlas(){
   
   ImgWindow::sFontAtlas = std::make_shared<ImgFontAtlas>();
 
-  // ImGui::CreateContext();
+  InitImGui();
+
+
+  float w = ImGui::GetWindowWidth();
+  
+    ImVec4 nice_pink = ImColor(255, 150, 200);
+    ImVec4 light_grey = ImColor(0xffb4a0aa);
+    ImVec4 yellow = ImColor(247, 170, 61);
+    ImVec4 red = ImColor(0xff, 0x33, 0x33);
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(75, 620));
+
+    ImGui::PushFont(test10);
+    ImGui::Begin("SELECTION", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+
+    
+
+    // int oL, oT, oR, oB;
+    // XPLMGetWindowGeometry(ImgWindow::GetWindowId(), &oL, &oT, &oR, &oB);
+    // ImGui::TextWrapped("Left: %d, Top: %d, Right: %d, Bottom: %d", oL, oT, oR, oB);
+
+
+
+    ImGui::End();
+
+
+    ImGui::SetNextWindowPos(ImVec2(77, 0))  ;
+    ImGui::SetNextWindowSize(ImVec2(1203, 620));
+    
+   
+    
+    ImGui::Begin("SETTINGS", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+    ImGui::PushFont(test20);
+    ImGui::TextWrapped("Ilias 'Airfighter' Tselios !!!");
+    ImGui::End();
+
+    ImGui::PopFont();
+    ImGui::PopStyleVar(1);
+
+
+    ImGui::PopFont();
+
+
+
+//    ImgWindow::sFontAtlas->AddFontFromFileTTF(menu_font, 20);
+
+
 
   // ImGuiIO &io = ImGui::GetIO();
 
   // io.Fonts->Clear();
 
-  //  io.Fonts->AddFontDefault();
+  // io.Fonts->AddFontDefault();
+ 
 
-  char *menu_font = mkpathname(plugindir, "/resources/fonts/Roboto-Regular.ttf", NULL);
-  ImgWindow::sFontAtlas->AddFontFromFileTTF(menu_font, 20);
-  lacf_free(menu_font);
+  // char *menu_font = mkpathname(plugindir, "resources/fonts/Roboto-Regular.ttf", NULL);
+  // ImgWindow::sFontAtlas->AddFontFromFileTTF(menu_font, 20);
+    // logMsg("%s", menu_font);
+  // lacf_free(menu_font);
 
-  ImFontConfig config;
+  // ImFontConfig config;
   // config.OversampleH = 1;
   // config.OversampleV = 1;
   // config.GlyphExtraSpacing.x = 1.0f;
@@ -80,20 +171,20 @@ class ConfigureWindow : public ImgFontAtlas {
 
   // We only read very selectively the individual glyphs we are actually using
   // to safe on texture space
-  static ImVector<ImWchar> icon_ranges;
-  ImFontGlyphRangesBuilder builder;
+  // static ImVector<ImWchar> icon_ranges;
+  // ImFontGlyphRangesBuilder builder;
   // Add all icons that are actually used (they concatenate into one string)
   // builder.AddText(
   //     ConfigureWindowICON_FA_SLIDERS ICON_FA_EXTERNAL_LINK_SQUARE_ALT ICON_FA_WINDOW_MAXIMIZE
   //         ICON_FA_WINDOW_MINIMIZE ICON_FA_WINDOW_RESTORE ICON_FA_WINDOW_CLOSE
   //             ICON_FA_TIMES_CIRCLE ICON_FA_BALANCE_SCALE ICON_FA_SAVE);
 
-  builder.BuildRanges(&icon_ranges);
+  // builder.BuildRanges(&icon_ranges);
 
   // ImgWindow::sFontAtlas->AddFontFromMemoryCompressedTTF(
   //     fa_solid_900_compressed_data, fa_solid_900_compressed_size, FONT_SIZE,
   //     &config, icon_ranges.Data);
-  config.MergeMode = true;
+ // config.MergeMode = true;
   // io.Fonts->Build();
 }
 
@@ -106,7 +197,7 @@ virtual ~ConfigureWindow() {
 
 
 class SettingsWindow : public ImgWindow {
-  public:
+public:
   SettingsWindow(int left, int top, int right, int bottom) : ImgWindow(left, top, right, bottom) {
     
     ImGuiIO& io = ImGui::GetIO();
@@ -123,11 +214,10 @@ class SettingsWindow : public ImgWindow {
 
   }
 
- 
-
 
   virtual void buildInterface() override {
 
+   
     // ImGui::CreateContext();
     // ImGuiIO &io = ImGui::GetIO(); (void)io;
     // 
@@ -158,29 +248,35 @@ class SettingsWindow : public ImgWindow {
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(75, 620));
 
+    ImGui::PushFont(test10);
     ImGui::Begin("SELECTION", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
-    // ImGui::PushFont(menu_font);
+    
 
     int oL, oT, oR, oB;
     XPLMGetWindowGeometry(ImgWindow::GetWindowId(), &oL, &oT, &oR, &oB);
     ImGui::TextWrapped("Left: %d, Top: %d, Right: %d, Bottom: %d", oL, oT, oR, oB);
 
 
-    // ImGui::PopFont();
 
     ImGui::End();
 
 
     ImGui::SetNextWindowPos(ImVec2(77, 0))  ;
     ImGui::SetNextWindowSize(ImVec2(1203, 620));
+    
+   
+    
     ImGui::Begin("SETTINGS", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    ImGui::TextWrapped("Ilias 'Airfighter' Tselios");
+    ImGui::PushFont(test20);
+    ImGui::TextWrapped("Ilias 'Airfighter' Tselios !!!");
     ImGui::End();
 
+    ImGui::PopFont();
     ImGui::PopStyleVar(1);
 
 
+    ImGui::PopFont();
   }
 
 private: 
@@ -192,10 +288,14 @@ SettingsWindow *window = nullptr;
 
 extern "C" {
 
-    void Config() {
+  void Config() {
 
-   config = new ConfigureWindow();
-    }
+  config = new ConfigureWindow();
+
+  GetPluginPath();
+
+  
+  }
    
 
     void settings_show() {
