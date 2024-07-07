@@ -3,8 +3,12 @@
 */
 
 #include "main.h"
+#include "XPLMProcessing.h"
 #include "menu.h"
 #include "gui.h"
+
+
+static float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon);
 
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
@@ -15,6 +19,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
   strcpy(outName, "Avanti Plugin");
   strcpy(outSig, "com.ilias.avanti");
   strcpy(outDesc, "Plugin for Avanti aircraft");
+
+  XPLMRegisterFlightLoopCallback(MyLoopCB, 1.0, NULL);
 
   log_init(XPLMDebugString, "[P-180 AVANTI]: ");
   logMsg("Plugin version: 3.0.0.a");
@@ -43,6 +49,14 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID id, intptr_t inMessage, void 
     UNUSED(inMessage);
     UNUSED(inParam);
 }
+
+
+float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon) {
+
+  // RenderCallback();
+  return 0.1;
+}
+
 
 
 int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {

@@ -43,8 +43,32 @@ std::string GetPluginPath() {
 }
 
 
-ImFont *test10;
-ImFont *test20;
+void CreateFontTexture() {
+    ImGuiIO& io = ImGui::GetIO();
+    unsigned char* pixels;
+    int width, height;
+
+    // Retrieve the font texture data
+    io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+    // Upload texture to graphics system
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    // Store our identifier
+    io.Fonts->TexID = (void*)(intptr_t)tex;
+}
+
+
+
+ImFont *test25;
+ImFont *test15;
 void RecreateFontAtlas() {
     // test Ben's code
   ImGuiIO& io = ImGui::GetIO();
@@ -74,14 +98,14 @@ void RecreateFontAtlas() {
   static const ImWchar ranges[] = { 0x0020, 0x00FF, 0 }; // Basic Latin + Latin Supplement
     config.GlyphRanges = ranges;
 
-  test10 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 10.0f, &config);
-  if (test10 == NULL) {
+  test25 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 25.0f, &config);
+  if (test25 == NULL) {
     logMsg("test10 did not load");
   }
 
-  test20 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 20.0f, &config);
-  if (test20 == NULL) {
-    logMsg("test20 did not LOAD!");
+  test15 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 20.0f, &config);
+  if (test15 == NULL) {
+    logMsg("test15 did not LOAD!");
   }
 
     logMsg("Menu Font: %s", menu_font.c_str());
@@ -95,19 +119,25 @@ void RecreateFontAtlas() {
     io.Fonts->AddFontDefault();
     }
 
-  io.Fonts->Build();
-
-    // Debugging: Check the glyphs in test20
-    if (test20) {
-        const ImFontGlyph* glyph = test20->FindGlyph('A');
+    if (!io.Fonts->Build()) {
+        logMsg("Font atlas build failed");
+    } else {
+        logMsg("Font atlas build succeeded");
+    }
+    
+    // Debugging: Check the glyphs in test15
+    if (test15) {
+        const ImFontGlyph* glyph = test15->FindGlyph('A');
         if (glyph) {
-            logMsg("Glyph 'A' found in test20 font");
+            logMsg("Glyph 'A' found in test15 font");
         } else {
-            logMsg("Glyph 'A' not found in test20 font");
+            logMsg("Glyph 'A' not found in test15 font");
         }
     } else {
-        logMsg("test20 font is NULL");
+        logMsg("test15 font is NULL");
     }
+
+  CreateFontTexture();
 
 }
 
@@ -124,21 +154,21 @@ void RenderDebugTools() {
     ImGui::ShowMetricsWindow();  // ImGui's built-in metrics window
 
     if (ImGui::Begin("Font Debug")) {
-        if (test10) {
-            ImGui::Text("test10 font loaded");
-            ImGui::Text("test10 font size: %.2f", test10->FontSize);
+        if (test25) {
+            ImGui::Text("test25 font loaded");
+            ImGui::Text("test25 font size: %.2f", test25->FontSize);
         } else {
-            ImGui::Text("test10 font is NULL");
+            ImGui::Text("test25 font is NULL");
         }
 
-        if (test20) {
-            ImGui::Text("test20 font loaded");
-            ImGui::Text("test20 font size: %.2f", test20->FontSize);
+        if (test15) {
+            ImGui::Text("test15 font loaded");
+            ImGui::Text("test15 font size: %.2f", test15->FontSize);
         } else {
-            ImGui::Text("test20 font is NULL");
+            ImGui::Text("test15 font is NULL");
         }
     ImGui::Text("Font Atlas:");
-        ImGui::Image((void*)(intptr_t)test10->ContainerAtlas->TexID, ImVec2(test10->ContainerAtlas->TexWidth, test10->ContainerAtlas->TexHeight));
+        ImGui::Image((void*)(intptr_t)test25->ContainerAtlas->TexID, ImVec2(test25->ContainerAtlas->TexWidth, test25->ContainerAtlas->TexHeight));
     }
     ImGui::End();
 }
@@ -180,6 +210,12 @@ public:
 
   virtual void buildInterface() override {
 
+     // Ensure ImGui rendering uses the correct texture
+    ImGuiIO& io = ImGui::GetIO();
+    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)io.Fonts->TexID);
+
+    RenderDebugTools();  // Include the debug tools in your render loop
+
     float w = ImGui::GetWindowWidth();
   
     ImVec4 nice_pink = ImColor(255, 150, 200);
@@ -193,10 +229,10 @@ public:
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(75, 620));
 
-    if (test10 != NULL) {
-    ImGui::PushFont(test10);
+    if (test15 != NULL) {
+    ImGui::PushFont(test15);
     } else {
-      logMsg("test10 font is NULL");
+      logMsg("test15 font is NULL");
     }
     ImGui::Begin("SELECTION", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
@@ -212,27 +248,35 @@ public:
     
     ImGui::Begin("SETTINGS", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
     
-    if (test20 != NULL){
-      ImGui::PushFont(test20);
+    if (test25 != NULL){
+      ImGui::PushFont(test25);
     } else {
-      logMsg("test20 font is NULL");
+      logMsg("test25 font is NULL");
     }
     ImGui::TextWrapped("Ilias 'Airfighter' Tselios !!!");
     
     ImGui::End();
-
     ImGui::PopFont();
     ImGui::PopStyleVar(1);
-
-
     ImGui::PopFont();
-     RenderDebugTools();
 
   }
 
 private: 
 
 };
+
+
+void Render() {
+    // Your rendering code
+
+    // Ensure ImGui rendering uses the correct texture
+    ImGuiIO& io = ImGui::GetIO();
+    glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)io.Fonts->TexID);
+
+    RenderDebugTools();  // Include the debug tools in your render loop
+}
+
 
 ConfigureWindow *config = nullptr;
 SettingsWindow *window = nullptr;
@@ -265,6 +309,15 @@ extern "C" {
     void settings_cleanup() {
           if(window) delete window;
     }
+
+    // void RenderCallback() {
+    //     // Ensure OpenGL context is active
+    //
+    //     // Your rendering code
+    //     Render();  // Call your render function
+    // }
+
+
 }
 
 
