@@ -1,5 +1,6 @@
 #include "gui.h"
 #include <cstddef>
+#include <cstdint>
 #include <stdbool.h>
 #include <memory>
 #include <string>
@@ -10,12 +11,12 @@
 #include "XPLMPlugin.h"
 #include "acfutils/log.h"
 #include "acfutils/helpers.h"
+#include "image_loader.h"
 
 
 float scale = 1.0f;
 char plugindir[MAX_PATH]{};
 char *p;
-
 
 std::string GetPluginPath() {
 
@@ -36,8 +37,7 @@ std::string GetPluginPath() {
     }
   }
 
-  logMsg("Plugin Top Folder: %s", plugindir);
-
+  logMsg("Plugin Top Folder!!!! : %s", plugindir);
   return plugindir;
 
 }
@@ -173,6 +173,19 @@ void RenderDebugTools() {
     ImGui::End();
 }
 
+
+GLuint cg_icon_id = 0;
+void load_cg_icon() {
+  std::string filename = "/mnt/916d7a1f-7d19-4354-823b-6606cd3a516e/X-Plane 12 Betas/Aircraft/ILIAS/P180_Avanti_II/plugins/avanti/resources/images/cg_icon.png";
+  cg_icon_id = loadImage(filename.c_str());
+
+  if (cg_icon_id != 0) {
+    logMsg("cgIcon loaded");
+  }
+}
+
+
+
 class ConfigureWindow : public ImgFontAtlas {
 public:
   ConfigureWindow() : ImgFontAtlas(){
@@ -214,7 +227,7 @@ public:
     ImGuiIO& io = ImGui::GetIO();
     glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)io.Fonts->TexID);
 
-    RenderDebugTools();  // Include the debug tools in your render loop
+    // RenderDebugTools();  // Include the debug tools in your render loop
 
     float w = ImGui::GetWindowWidth();
   
@@ -253,7 +266,11 @@ public:
     } else {
       logMsg("test25 font is NULL");
     }
-    ImGui::TextWrapped("Ilias 'Airfighter' Tselios. All rights reserved.");
+    ImGui::TextWrapped("Ilias 'Airfighter' Tselios. All rights reserved. c 2024.");
+
+    if (cg_icon_id) {
+  ImGui::Image((void *)(intptr_t)cg_icon_id, ImVec2(189, 189));
+    }
     
     ImGui::End();
     ImGui::PopFont();
@@ -281,44 +298,33 @@ void Render() {
 ConfigureWindow *config = nullptr;
 SettingsWindow *window = nullptr;
 
-extern "C" {
-
   void Config() {
   
   InitImGui();
+  load_cg_icon();
 
   config = new ConfigureWindow();
 
   GetPluginPath();
-
   
   }
-   
 
-    void settings_show() {
+  void settings_show() {
       if (!window) {
           window = new SettingsWindow(100, 0, 100, 200);
       }
       window->SetVisible(!window->GetVisible());
-    }
+  }
 
-    bool settings_is_visible() {
+  bool settings_is_visible() {
           return window && window->GetVisible() && window->IsWindowInFront();
-    }
+  }
 
-    void settings_cleanup() {
+  void settings_cleanup() {
           if(window) delete window;
-    }
+  }
+  
 
-    // void RenderCallback() {
-    //     // Ensure OpenGL context is active
-    //
-    //     // Your rendering code
-    //     Render();  // Call your render function
-    // }
-
-
-}
 
 
 

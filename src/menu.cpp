@@ -4,6 +4,7 @@
 #include "XPLMUtilities.h"
 #include "acfutils/dr.h"
 #include "menu.h"
+#include "gui.h"
 
 dr_t show_ui;
 XPLMCommandRef show_settings_ui = NULL;
@@ -13,6 +14,17 @@ void setting_menu_handler (void *, void *inItemRef) {
   if (inItemRef == (void*)1) {
     XPLMCommandOnce(show_settings_ui);
   }
+}
+
+
+
+int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
+
+  if(inPhase == 0) {
+    settings_show();
+  }
+
+  return 0;
 }
 
 

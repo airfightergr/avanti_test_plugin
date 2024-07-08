@@ -60,25 +60,27 @@ float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon) {
 
 
 
-int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-
-  if(inPhase == 0) {
-    settings_show();
-  }
-
-  return 0;
-}
+// int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
+//
+//   if(inPhase == 0) {
+//     settings_show();
+//   }
+//
+//   return 0;
+// }
 
 
 PLUGIN_API void XPluginStop(void) {
 
   menu_destroy();
+  // settings_cleanup();
 }
 
 
 PLUGIN_API void XPluginDisable(void) {
 
-  menu_destroy();
+ // menu_destroy();
+
 }
 
 
