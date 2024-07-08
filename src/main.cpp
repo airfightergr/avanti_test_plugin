@@ -8,7 +8,7 @@
 #include "gui.h"
 
 
-static float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon);
+float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon);
 
 
 PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
@@ -38,7 +38,8 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 PLUGIN_API int XPluginEnable(void) {
 
   Config();
-  
+ 
+  menu_dref_init();
 
   return 1;
 }

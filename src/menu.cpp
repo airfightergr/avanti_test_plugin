@@ -2,7 +2,11 @@
 
 #include "XPLMMenus.h"
 #include "XPLMUtilities.h"
+#include "acfutils/dr.h"
 #include "menu.h"
+
+dr_t show_ui;
+XPLMCommandRef show_settings_ui = NULL;
 
 
 void setting_menu_handler (void *, void *inItemRef) {
@@ -27,6 +31,12 @@ void menu_init(void) {
 }
 
 
+void menu_dref_init() {
+  dr_seti(&show_ui, 0);
+}
+
+
 void menu_destroy(void) {
   XPLMUnregisterCommandHandler(show_settings_ui, show_settings_ui_handler, 0, 0);
+  dr_delete(&show_ui);
 }

@@ -36,7 +36,7 @@ std::string GetPluginPath() {
     }
   }
 
-  logMsg("Plugin top folder: %s", plugindir);
+  logMsg("Plugin Top Folder: %s", plugindir);
 
   return plugindir;
 
@@ -253,7 +253,7 @@ public:
     } else {
       logMsg("test25 font is NULL");
     }
-    ImGui::TextWrapped("Ilias 'Airfighter' Tselios !!!");
+    ImGui::TextWrapped("Ilias 'Airfighter' Tselios. All rights reserved.");
     
     ImGui::End();
     ImGui::PopFont();

@@ -1,9 +1,11 @@
 #pragma once
+
+#ifndef MAIN_H
+#define MAIN_H
+
+
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include <string.h>
 #include <time.h>
 
@@ -25,10 +27,6 @@ extern "C" {
 
 
 
+#endif // MAIN_H
 
-
-
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
 

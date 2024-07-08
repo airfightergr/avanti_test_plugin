@@ -9,8 +9,9 @@
 #include "XPLMDataAccess.h"
 #include "acfutils/dr.h"
 // menu
-static XPLMCommandRef show_settings_ui = NULL;
+// XPLMCommandRef show_settings_ui = NULL;
 int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon);
 void menu_init();
+void menu_dref_init();
 void menu_destroy();
-static dr_t show_ui;
+
