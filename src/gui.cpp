@@ -12,35 +12,11 @@
 #include "acfutils/log.h"
 #include "acfutils/helpers.h"
 #include "image_loader.h"
+#include "globals.h"
+#include "gui_debug.h"
 
 
 float scale = 1.0f;
-char plugindir[MAX_PATH]{};
-char *p;
-
-std::string GetPluginPath() {
-
-  XPLMGetPluginInfo(XPLMGetMyID(), NULL, plugindir, NULL, NULL);
-  fix_pathsep(plugindir); // Fixes path separator per OS
-
-  logMsg("Plugin full path: %s", plugindir);
-
-  // cut off the trailing path to get the top plugin path
-  if ((p = strrchr(plugindir, DIRSEP)) != NULL)
-    *p = '\0';
-
-  if ((p = strrchr(plugindir, DIRSEP)) != NULL) {
-    if (strcmp(p + 1, "64") == 0 || strcmp(p + 1, "32") == 0 ||
-        strcmp(p + 1, "win_x64") == 0 || strcmp(p + 1, "mac_x64") == 0 ||
-        strcmp(p + 1, "lin_x64") == 0) {
-      *p = '\0';
-    }
-  }
-
-  logMsg("Plugin Top Folder!!!! : %s", plugindir);
-  return plugindir;
-
-}
 
 
 void CreateFontTexture() {
@@ -66,11 +42,12 @@ void CreateFontTexture() {
 }
 
 
-
+// Init fonts with ImFont *myfont;
 ImFont *test25;
-ImFont *test15;
+ImFont *test20;
+ImFont *roboto18;
 void RecreateFontAtlas() {
-    // test Ben's code
+    
   ImGuiIO& io = ImGui::GetIO();
 
   IM_DELETE(io.Fonts);
@@ -83,17 +60,18 @@ void RecreateFontAtlas() {
   config.PixelSnapH = false;
   config.MergeMode = false;
 
-  std::string menu_font = "/mnt/916d7a1f-7d19-4354-823b-6606cd3a516e/X-Plane 12 Betas/Aircraft/ILIAS/P180_Avanti_II/plugins/avanti/resources/fonts/menu.ttf";
-  
-   // Check if the font file exists
-    std::ifstream font_file(menu_font.c_str());
-    if (!font_file.good()) {
-        logMsg("Font file does not exist: %s", menu_font.c_str());
-        return;
-    } else {
-        logMsg("Font file exists: %s", menu_font.c_str());
-    }
-    font_file.close();
+  std::string menu_font = pluginDirectory + "resources/fonts/menu.ttf";
+  std::string roboto_reg = pluginDirectory + "resources/fonts/Roboto-Regular.ttf";
+
+  // Check if the font file exists
+  std::ifstream font_file(menu_font.c_str());
+  if (!font_file.good()) {
+      logMsg("Font file does not exist: %s", menu_font.c_str());
+      return;
+  } else {
+      logMsg("Font file exists: %s", menu_font.c_str());
+  }
+  font_file.close();
 
   static const ImWchar ranges[] = { 0x0020, 0x00FF, 0 }; // Basic Latin + Latin Supplement
     config.GlyphRanges = ranges;
@@ -103,10 +81,12 @@ void RecreateFontAtlas() {
     logMsg("test10 did not load");
   }
 
-  test15 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 20.0f, &config);
-  if (test15 == NULL) {
-    logMsg("test15 did not LOAD!");
+  test20 = io.Fonts->AddFontFromFileTTF(menu_font.c_str(), 20.0f, &config);
+  if (test20 == NULL) {
+    logMsg("test20 did not LOAD!");
   }
+
+  roboto18 = io.Fonts->AddFontFromFileTTF(roboto_reg.c_str(), 18.0f, &config);
 
     logMsg("Menu Font: %s", menu_font.c_str());
 
@@ -125,16 +105,16 @@ void RecreateFontAtlas() {
         logMsg("Font atlas build succeeded");
     }
     
-    // Debugging: Check the glyphs in test15
-    if (test15) {
-        const ImFontGlyph* glyph = test15->FindGlyph('A');
+    // Debugging: Check the glyphs in test20
+    if (test20) {
+        const ImFontGlyph* glyph = test20->FindGlyph('A');
         if (glyph) {
-            logMsg("Glyph 'A' found in test15 font");
+            logMsg("Glyph 'A' found in test20 font");
         } else {
-            logMsg("Glyph 'A' not found in test15 font");
+            logMsg("Glyph 'A' not found in test20 font");
         }
     } else {
-        logMsg("test15 font is NULL");
+        logMsg("test20 font is NULL");
     }
 
   CreateFontTexture();
@@ -150,37 +130,20 @@ void InitImGui() {
   logMsg("font atlas created");
 }
 
-void RenderDebugTools() {
-    ImGui::ShowMetricsWindow();  // ImGui's built-in metrics window
 
-    if (ImGui::Begin("Font Debug")) {
-        if (test25) {
-            ImGui::Text("test25 font loaded");
-            ImGui::Text("test25 font size: %.2f", test25->FontSize);
-        } else {
-            ImGui::Text("test25 font is NULL");
-        }
-
-        if (test15) {
-            ImGui::Text("test15 font loaded");
-            ImGui::Text("test15 font size: %.2f", test15->FontSize);
-        } else {
-            ImGui::Text("test15 font is NULL");
-        }
-    ImGui::Text("Font Atlas:");
-        ImGui::Image((void*)(intptr_t)test25->ContainerAtlas->TexID, ImVec2(test25->ContainerAtlas->TexWidth, test25->ContainerAtlas->TexHeight));
-    }
-    ImGui::End();
-}
-
-
+// init each image id with GLuint
 GLuint cg_icon_id = 0;
-void load_cg_icon() {
-  std::string filename = "/mnt/916d7a1f-7d19-4354-823b-6606cd3a516e/X-Plane 12 Betas/Aircraft/ILIAS/P180_Avanti_II/plugins/avanti/resources/images/cg_icon.png";
+GLuint company_logo_id = 0;
+void load_gui_images() {
+  std::string filename = pluginDirectory + "resources/images/cg_icon.png";
   cg_icon_id = loadImage(filename.c_str());
 
-  if (cg_icon_id != 0) {
-    logMsg("cgIcon loaded");
+  std::string company_logo_file = pluginDirectory + "resources/images/company.png";
+  company_logo_id = loadImage(company_logo_file.c_str());
+
+  // debug
+  if (cg_icon_id != 0 && company_logo_id != 0) {
+    logMsg("Gui Images Loaded");
   }
 }
 
@@ -200,6 +163,7 @@ virtual ~ConfigureWindow() {
 
 
 };
+
 
 
 class SettingsWindow : public ImgWindow {
@@ -242,38 +206,62 @@ public:
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(75, 620));
 
-    if (test15 != NULL) {
-    ImGui::PushFont(test15);
+
+    // ImGui::Begin("SELECTION", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+    //
+    // int oL, oT, oR, oB;
+    // XPLMGetWindowGeometry(ImgWindow::GetWindowId(), &oL, &oT, &oR, &oB);
+    // ImGui::TextWrapped("Left: %d, Top: %d, Right: %d, Bottom: %d", oL, oT, oR, oB);
+    //
+    // ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0))  ;
+    ImGui::SetNextWindowSize(ImVec2(1280, 620));
+    
+    if (roboto18 != NULL) {
+      ImGui::PushFont(roboto18);
     } else {
-      logMsg("test15 font is NULL");
-    }
-    ImGui::Begin("SELECTION", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-
-    int oL, oT, oR, oB;
-    XPLMGetWindowGeometry(ImgWindow::GetWindowId(), &oL, &oT, &oR, &oB);
-    ImGui::TextWrapped("Left: %d, Top: %d, Right: %d, Bottom: %d", oL, oT, oR, oB);
-
-    ImGui::End();
-
-    ImGui::SetNextWindowPos(ImVec2(77, 0))  ;
-    ImGui::SetNextWindowSize(ImVec2(1203, 620));
-  
+      logMsg("roboto18 font is NULL");
+    } 
     
-    ImGui::Begin("SETTINGS", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-    
-    if (test25 != NULL){
-      ImGui::PushFont(test25);
-    } else {
-      logMsg("test25 font is NULL");
-    }
-    ImGui::TextWrapped("Ilias 'Airfighter' Tselios. All rights reserved. c 2024.");
+    // ImGui::Begin("##SETTINGS", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+   
+    // Tab Bar
+    if (ImGui::BeginTabBar("#tabs", ImGuiTabBarFlags_FittingPolicyDefault_)) {
 
-    if (cg_icon_id) {
-  ImGui::Image((void *)(intptr_t)cg_icon_id, ImVec2(189, 189));
-    }
+      if (ImGui::BeginTabItem("CONFIGURATOR")) {
+
+        if (test25 != NULL){
+          ImGui::PushFont(test25);
+        } else {
+          logMsg("test25 font is NULL");
+        }
+        ImGui::TextWrapped("Ilias 'Airfighter' Tselios. All rights reserved. c 2024.");
+        ImGui::PopFont(); //test25
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("LOADING")) {
+        if (cg_icon_id) {
+          ImGui::Image((void *)(intptr_t)cg_icon_id, ImVec2(128, 128));
+        }
+        ImGui::EndTabItem();
+      }
+
+      if (ImGui::BeginTabItem("SOMETHING ELSE")) {
+        if (company_logo_id) {
+          ImGui::Image((void *)(intptr_t)company_logo_id, ImVec2(128,128)); 
+        }
+        ImGui::EndTabItem();
+      }
     
-    ImGui::End();
-    ImGui::PopFont();
+    ImGui::EndTabBar();
+
+    }
+
+    // ImGui::End();
+   
+
     ImGui::PopStyleVar(1);
     ImGui::PopFont();
 
@@ -291,38 +279,34 @@ void Render() {
     ImGuiIO& io = ImGui::GetIO();
     glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)io.Fonts->TexID);
 
-    RenderDebugTools();  // Include the debug tools in your render loop
+    // RenderDebugTools();  // Include the debug tools in your render loop
 }
 
 
 ConfigureWindow *config = nullptr;
 SettingsWindow *window = nullptr;
-
-  void Config() {
+void Config() {
   
   InitImGui();
-  load_cg_icon();
-
+  load_gui_images();
   config = new ConfigureWindow();
+}
 
-  GetPluginPath();
-  
-  }
-
-  void settings_show() {
+void settings_show() {
       if (!window) {
           window = new SettingsWindow(100, 0, 100, 200);
       }
       window->SetVisible(!window->GetVisible());
-  }
+}
 
-  bool settings_is_visible() {
-          return window && window->GetVisible() && window->IsWindowInFront();
-  }
+bool settings_is_visible() {
+  return window && window->GetVisible() && window->IsWindowInFront();
+}
 
-  void settings_cleanup() {
-          if(window) delete window;
-  }
+void settings_cleanup() {
+  // if(window) 
+    delete window;
+}
   
 
 

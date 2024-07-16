@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "XPLMProcessing.h"
+#include "globals.h"
 #include "menu.h"
 #include "gui.h"
 
@@ -27,8 +28,10 @@ PLUGIN_API int XPluginStart(char *outName, char *outSig, char *outDesc) {
 
 
   // Initializations
-  glewInit();
+  // glewInit();
   menu_init();
+  init_globals();
+
    
   return 1;
 
@@ -63,7 +66,7 @@ float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon) {
 // int show_settings_ui_handler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 //
 //   if(inPhase == 0) {
-//     settings_show();
+    // settings_show();
 //   }
 //
 //   return 0;
@@ -73,13 +76,13 @@ float MyLoopCB(float elapsedMe, float elapsedSim, int counter, void * refcon) {
 PLUGIN_API void XPluginStop(void) {
 
   menu_destroy();
-  // settings_cleanup();
+  settings_cleanup();
 }
 
 
 PLUGIN_API void XPluginDisable(void) {
 
- // menu_destroy();
+ menu_destroy();
 
 }
 

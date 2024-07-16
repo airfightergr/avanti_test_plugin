@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(avanti VERSION 3.0.0 LANGUAGES C CXX)
 
-include(cmake/xplm.cmake)
+# include(cmake/xplm.cmake)
 
 add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM302=1 -DXPLM303=1 -DXPLM400=1)
 
@@ -35,22 +35,23 @@ include_directories(
         "SDK/CHeaders/XPLM"
         "libacfutils/include/"
         "libacfutils/${ARCH}/include/"
+        "includes/"
 )
 
 
 find_package(Threads REQUIRED)
 find_package(OpenGL REQUIRED)
 
-use_static_libc()
+# use_static_libc()
 
 add_library(avanti SHARED 
           #SRC FILES
-          src/main.c 
-          src/main.h
-          src/menu.c
-          src/menu.h
-          src/gui.cpp
-          src/gui.h
+          src/main.cpp    src/main.h
+          src/globals.cpp src/globals.h
+          src/menu.cpp    src/menu.h
+          src/gui.cpp     src/gui.h
+          src/image_loader.cpp src/image_loader.h
+          #src/gui_debug.cpp src/gui_debug.h
 
           #IMGUI FILES
           imgui/imgui.cpp
